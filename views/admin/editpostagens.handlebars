@@ -1,0 +1,22 @@
+{{#each erros}}
+  <div class="primeiroDiv">{{texto}}</div>
+  {{else}}
+
+{{/each}}
+<div class="container">
+      <!--uma coluna-->
+
+    <div class="row">
+      <div class="primeiroDiv">
+
+        <form class="" action="/admin/postagens/edit" method="post">
+          <img src="segundo.png" alt="">
+          <input type="hidden" name="id" value="{{postagens.id}}">
+          <input type="text" name="msg" value="{{postagens.msg}}">
+          <button  type="submit" name="button">Editar</button>
+        </form>
+
+
+      </div>
+    </div>
+</div>
