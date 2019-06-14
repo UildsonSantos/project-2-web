@@ -76,6 +76,38 @@ e que elas não tenham um tamanho menor que eles */
     *display: inline;
 }
 
+@@media (min-width:928px) {
+  .col-2 {
+    width: 40%;
+  }
+}
+
+.col-2 {
+  width: 9.7777%;
+  text-align:right;
+  padding: 10px 5px;
+  margin: 2px 2px;
+}
+.col-3 {
+  width: 9.7777%;
+  text-align:justify;
+  padding: 5px 10px;
+}
+
+.col-1 {
+  width: 100%;
+  text-align:right;
+  padding: 10px 60px;
+  margin: 2px 2px;
+}
+
+.test {
+
+  background: #f5d5fe;
+
+  text-align: center;
+}
+
 .primeiroDiv {
     text-align: center;
     width: 100%;

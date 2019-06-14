@@ -18,6 +18,11 @@ require("./config/auth")(passport)
 const db = require('./config/db')
 
 
+require('dotenv').config()
+const cloudinary = require("cloudinary");
+require('./handlers/cloudinary')
+const upload = require('./handlers/multer')
+
 
 // Configuraçõelse
   // Sessão
@@ -54,6 +59,7 @@ const db = require('./config/db')
     }).catch((err) => {
       console.log(' Erro ao se conectar: '+err);
     })
+
 // Rotas principais
 // Pag sem usuarios
 app.get('/',(req, res) => {

@@ -1,15 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose')
+require('dotenv').config()
 require('../models/Usuario')
 const Usuario = mongoose.model('usuarios')
 
 require('../models/Postagem')
+const cloudinary = require("cloudinary");
 const Postagem = mongoose.model('postagens')
-
+require('../handlers/cloudinary')
+const upload = require('../handlers/multer')
 const {estaLogado} = require('../helpers/eAdmin')
 
 
+/*
 router.get('/postagens', estaLogado,  (req, res) => {
   Postagem.find().sort({date: 'desc'}).then((postagens) => {
     res.render('/postagens/index', {postagens:postagens})
@@ -18,6 +22,17 @@ router.get('/postagens', estaLogado,  (req, res) => {
         res.redirect('/')
     })
 })
+*/
+router.get('/postagens', estaLogado, async(req, res) => {
+      const post = await Postagem.find({})
+      res.render('postagens/index', {
+        post
+      }).catch((err) => {
+          req.flash('error_msg', 'Houve um erro interno')
+          res.redirect('/')
+      })
+    })
+
 
 router.get('/postagens/add', estaLogado, (req, res) => {
   res.render('admin/addpostagens')
@@ -36,36 +51,33 @@ router.get('/postagens/edit:id', estaLogado, (req, res) => {
   })
 
 
-router.post('/postagens/edit', estaLogado, (req, res) => {
-    var erros = []
-  if(!req.body.msg || typeof req.body.msg == undefined || req.body.msg == null ){
-    // fazer uma validação
-      req.body.msg = 'postagem vazia'
-      erros.push({texto: "Nenhuma postagem"})
-      //res.render("postagens/index", {erros: erros})
+router.post('/postagens/edit',estaLogado, upload.single('image'),  (req, res)  => {
 
-  }
-      Postagem.findOne({_id: req.body.id}).then((postagem) => {
-            postagem.msg = req.body.msg
-          //  ,endImagen: req.body.endImagem
+      Postagem.findOne({_id: req.body.id}).then(async(postagens) => {
+        const result = await cloudinary.v2.uploader.upload(req.file.path) //nao tenho certeza
+        console.log('o que esta:');
+        console.log(result);
+            postagens.title = req.body.title
+            postagens.imageUrl = result.secure_url
 
-          postagem.save().then(() => {
+            postagens.save().then(() => {
             req.flash("success_msg", "Postagem editada com sucesso!")
             res.redirect("/postagens")
           }).catch((err) => {
               req.flash('error_msg', 'erro ao salvar a edição da postagem')
+
               res.redirect('/postagens')
           })
 
       }).catch((err) => {
-          req.flash('error_msg', 'erro ao editar a postagem')
+          req.flash('error_msg', 'Erro, voce não modificou a postagem')
           res.redirect('/postagens')
       })
-
-
   })
+
+
 router.post('/postagens/deletar', estaLogado, (req, res) => {
-    Postagem.remove({_id: req.body.id}).then(() => {
+    Postagem.deleteOne({_id: req.body.id}).then(() => {
       req.flash("success_msg", "Postagem deletada com sucesso!")
       res.redirect('/postagens')
     }).catch((err) => {
@@ -76,30 +88,25 @@ router.post('/postagens/deletar', estaLogado, (req, res) => {
 })
 
 
-router.post('/postagens/nova', estaLogado, (req, res) => {
-    var erros = []
+router.post('/postagens/nova', estaLogado, upload.single('image'), async (req, res) => {
 
-    if(!req.body.msg || typeof req.body.msg == undefined || req.body.msg == null ){
-      // fazer uma validação
-        erros.push({texto: "Nenhuma postagem"})
-        res.render("admin/addpostagens", {erros: erros})
-    }else {
+      const result = await cloudinary.v2.uploader.upload(req.file.path)
+      var newPost = {
+        title:req.body.title,
+        imageUrl: result.secure_url
+      }
 
-          const novaPostagem = {
-            msg: req.body.msg
-          }
 
-          new Postagem(novaPostagem).save().then(() => {
-          req.flash("success_msg", "Salvo com sucesso!")
-          console.log('Postagem salva com sucesso!');
-          res.redirect("/postagens")
+      new Postagem(newPost).save().then(() => {
+      req.flash("success_msg", "Salvo com sucesso!")
+      console.log('Postagem salva com sucesso!');
+      res.redirect("/postagens")
 
-          }).catch((err) => {
-            req.flash("error_msg", "Erro ao salvar Postagem!")
-            console.log('Erro ao salvar Postagem');
-            res.redirect("/postagens")
-          })
-    }
+      }).catch((err) => {
+        req.flash("error_msg", "Erro ao salvar Postagem!")
+        console.log('Erro ao salvar Postagem');
+        res.redirect("/postagens")
+      })
 })
 
 

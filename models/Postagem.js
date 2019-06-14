@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const Postagem = new Schema({
-    msg:{
+    title:{
       type: String,
       required: true
     },
